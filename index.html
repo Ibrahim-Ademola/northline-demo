@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northline Sneakers (demo store)</title>
+<style>
+  :root { --ink:#111827; --muted:#6b7280; --line:#e5e7eb; --bg:#fafaf9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  .banner { background:#fef3c7; color:#78350f; font-size:13px; text-align:center; padding:8px 16px; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--line); background:#fff; }
+  .logo { font-weight:800; letter-spacing:.08em; font-size:18px; }
+  nav a { color:var(--ink); text-decoration:none; margin-left:20px; font-size:14px; }
+  nav a:hover { text-decoration:underline; }
+  .hero { max-width:1040px; margin:0 auto; padding:64px 24px 32px; }
+  .hero h1 { font-size:clamp(32px,5vw,52px); line-height:1.05; margin:0 0 16px; letter-spacing:-.02em; }
+  .hero p { color:var(--muted); font-size:17px; max-width:560px; margin:0; }
+  .grid { max-width:1040px; margin:0 auto; padding:24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .shoe { height:170px; display:flex; align-items:center; justify-content:center; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:#fff; }
+  .s1 { background:linear-gradient(135deg,#1f2937,#4b5563); }
+  .s2 { background:linear-gradient(135deg,#7c2d12,#ea580c); }
+  .s3 { background:linear-gradient(135deg,#064e3b,#10b981); }
+  .info { padding:14px 16px 18px; }
+  .info h3 { margin:0 0 4px; font-size:16px; }
+  .info span { color:var(--muted); font-size:14px; }
+  .help { max-width:1040px; margin:0 auto; padding:24px 24px 120px; color:var(--muted); font-size:14px; }
+  .help a { color:var(--ink); }
+  footer { border-top:1px solid var(--line); padding:20px 24px; font-size:12px; color:var(--muted); text-align:center; background:#fff; }
+</style>
+</head>
+<body>
+  <div class="banner">Demo store for testing a customer support agent. All products and policies are fictional.</div>
+
+  <header>
+    <div class="logo">NORTHLINE</div>
+    <nav>
+      <a href="returns.html">Returns</a>
+      <a href="faq.html">FAQ</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Everyday sneakers,<br>made to be worn.</h1>
+    <p>Free standard shipping on orders over $100. 30-day returns on unworn pairs. Questions? Ask our assistant in the corner.</p>
+  </section>
+
+  <section class="grid">
+    <div class="card"><div class="shoe s1">Runner 01</div><div class="info"><h3>Runner 01</h3><span>$129</span></div></div>
+    <div class="card"><div class="shoe s2">Court Low</div><div class="info"><h3>Court Low</h3><span>$110</span></div></div>
+    <div class="card"><div class="shoe s3">Trail Mid</div><div class="info"><h3>Trail Mid</h3><span>$145</span></div></div>
+  </section>
+
+  <section class="help">
+    Try asking: "How long do I have to return shoes?", "How much is express shipping?" or "Do you price match?".
+    Policies: <a href="returns.html">Returns and exchanges</a> and <a href="faq.html">FAQ</a>.
+  </section>
+
+  <footer>Northline Sneakers is a fictional store.</footer>
+
+  <script src="widget.js"
+          data-client="demo-001"
+          data-key="pk_e1a35b735f574132a5a10130d9160acc"
+          data-name="Northline Sneakers"
+          defer></script>
+</body>
+</html>

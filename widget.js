@@ -4,7 +4,8 @@
   <script src="https://ibrahim-ademola.github.io/northline-demo/widget.js"
           data-client="demo-001" data-key="pk_..." data-name="Northline Sneakers" defer></script>
 
-  Optional: data-color (accent, default #111827), data-greeting, data-endpoint, data-replies-endpoint.
+  Optional: data-color (accent, default #111827), data-greeting, data-endpoint, data-replies-endpoint,
+  data-privacy (link to the store's privacy policy, shown under the chat box).
   The public key only opens this one store's chat, so it is safe in page source.
 */
 (function () {
@@ -17,8 +18,9 @@
     key: script.getAttribute('data-key'),
     name: script.getAttribute('data-name') || 'Support',
     color: script.getAttribute('data-color') || '#111827',
+    privacy: script.getAttribute('data-privacy') || '',
     greeting: script.getAttribute('data-greeting') ||
-      'Hi! Ask me about shipping, returns, refunds or payments. If I can\'t help, I\'ll pass you to the team.'
+      'Hi! I\'m an AI assistant. Ask me about shipping, returns, refunds or payments. If I can\'t help, a person from the team will take over.'
   };
   if (!cfg.client || !cfg.key) {
     console.warn('Support widget: data-client and data-key are required.');
@@ -86,7 +88,8 @@
     '.input:focus{border-color:' + cfg.color + '}' +
     '.send{border:0;border-radius:10px;padding:0 14px;background:' + cfg.color + ';color:#fff;font-size:14px;font-weight:600;cursor:pointer}' +
     '.send:disabled{opacity:.5;cursor:default}' +
-    '.foot{font-size:11px;color:#9ca3af;text-align:center;padding:0 12px 10px;background:#fff}' +
+    '.foot{font-size:11px;color:#6b7280;text-align:center;padding:0 12px 10px;background:#fff}' +
+    '.plink{color:#6b7280;text-decoration:underline}' +
     '@media (max-width:480px){.panel{right:0;bottom:0;width:100vw;max-width:100vw;height:100vh;max-height:100vh;border-radius:0}}';
 
   var style = document.createElement('style');
@@ -110,7 +113,7 @@
 
   var head = el('div', 'head');
   var title = el('div', 'title', cfg.name);
-  title.appendChild(el('span', 'sub', 'Usually replies in seconds'));
+  title.appendChild(el('span', 'sub', 'AI assistant. A person can take over.'));
   var resetBtn = el('button', 'icon', 'New chat');
   var closeBtn = el('button', 'icon', 'Close');
   closeBtn.setAttribute('aria-label', 'Close chat');
@@ -129,7 +132,15 @@
   send.type = 'submit';
   form.appendChild(input); form.appendChild(send);
 
-  var foot = el('div', 'foot', 'Answers come from ' + cfg.name + '\'s policies. A person takes over when needed.');
+  var foot = el('div', 'foot', 'AI assistant. Chats are saved and may be reviewed by our team.');
+  if (/^https?:\/\//i.test(cfg.privacy)) {
+    foot.appendChild(document.createTextNode(' '));
+    var pl = el('a', 'plink', 'Privacy policy');
+    pl.href = cfg.privacy;
+    pl.target = '_blank';
+    pl.rel = 'noopener';
+    foot.appendChild(pl);
+  }
 
   panel.appendChild(head); panel.appendChild(log); panel.appendChild(form); panel.appendChild(foot);
   root.appendChild(launch); root.appendChild(panel);

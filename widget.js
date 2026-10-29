@@ -4,7 +4,7 @@
   <script src="https://ibrahim-ademola.github.io/northline-demo/widget.js"
           data-client="demo-001" data-key="pk_..." data-name="Northline Sneakers" defer></script>
 
-  Optional: data-color (accent, default #111827), data-greeting, data-endpoint.
+  Optional: data-color (accent, default #111827), data-greeting, data-endpoint, data-replies-endpoint.
   The public key only opens this one store's chat, so it is safe in page source.
 */
 (function () {
@@ -25,10 +25,18 @@
     return;
   }
 
+  // where approved draft replies are collected (draft mode)
+  cfg.replies = script.getAttribute('data-replies-endpoint') ||
+    cfg.endpoint.replace(/support-chat\/?$/, 'support-replies');
+
   var MAX_LEN = 1000;
+  var POLL_MS = 10000;            // check every 10 seconds
+  var POLL_FOR_MS = 15 * 60000;   // for up to 15 minutes per page visit
+  var WAIT_MAX_MS = 24 * 3600000; // a waiting reply older than 24 hours is not checked on load
   var TIMEOUT_MS = 45000;
   var SID_KEY = 'sw_sid_' + cfg.client;
   var LOG_KEY = 'sw_log_' + cfg.client;
+  var WAIT_KEY = 'sw_wait_' + cfg.client;
 
   // ---------- storage (fails safely in private windows) ----------
   function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -188,7 +196,10 @@
       setBusy(false);
       if (data && typeof data.reply === 'string' && data.reply) {
         add('bot', data.reply, true);
-        if (data.pending) add('note', 'Our team is reviewing your answer. Keep this page open or check back soon.', true);
+        if (data.pending) {
+          add('note', 'Our team is reviewing your answer. It will appear here, so keep this page open or check back soon.', true);
+          waitForReply();
+        }
       } else {
         add('note', 'Sorry, something went wrong. Please try again.', false);
       }
@@ -211,6 +222,68 @@
     }
   });
 
+  // ---------- approved draft replies (draft mode) ----------
+  // wait = how many replies this visitor is still waiting for, and when the last one started
+  function getWait() {
+    try { var w = JSON.parse(load(WAIT_KEY) || 'null'); if (w && w.n > 0) return w; } catch (e) {}
+    return null;
+  }
+  function setWait(w) { if (w && w.n > 0) store(WAIT_KEY, JSON.stringify(w)); else drop(WAIT_KEY); }
+
+  var pollTimer = null;
+  var pollStarted = 0;
+
+  function startPolling() {
+    pollStarted = Date.now();
+    if (!pollTimer) pollTimer = setInterval(poll, POLL_MS);
+  }
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  function poll() {
+    if (Date.now() - pollStarted > POLL_FOR_MS) { stopPolling(); return; }
+    if (document.hidden) return;
+    var w = getWait();
+    if (!w) { stopPolling(); return; }
+
+    fetch(cfg.replies, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: cfg.client, public_key: cfg.key, session_id: sid })
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (data) {
+      if (!data || !data.replies || !data.replies.length) return;
+      data.replies.forEach(function (t) { if (typeof t === 'string' && t) add('bot', t, true); });
+      var left = getWait();
+      if (left) { left.n -= data.replies.length; setWait(left); }
+      if (!getWait()) stopPolling();
+      if (!panel.classList.contains('open')) launch.setAttribute('aria-label', 'New reply from ' + cfg.name);
+    }).catch(function () { /* try again on the next check */ });
+  }
+
+  function waitForReply() {
+    var w = getWait() || { n: 0, t: 0 };
+    w.n += 1;
+    w.t = Date.now();
+    setWait(w);
+    startPolling();
+  }
+
+  // a reply may have been approved while the visitor was away
+  (function resumeWaiting() {
+    var w = getWait();
+    if (!w) return;
+    if (Date.now() - w.t > WAIT_MAX_MS) { setWait(null); return; }
+    startPolling();
+    poll();
+  })();
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && pollTimer) poll();
+  });
+
   // ---------- open, close, reset ----------
   function open() { panel.classList.add('open'); launch.setAttribute('aria-expanded', 'true'); input.focus(); }
   function close() { panel.classList.remove('open'); launch.setAttribute('aria-expanded', 'false'); launch.focus(); }
@@ -220,6 +293,8 @@
   panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 
   resetBtn.addEventListener('click', function () {
+    stopPolling();
+    setWait(null);
     sid = newId();
     store(SID_KEY, sid);
     history = [];

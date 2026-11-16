@@ -290,12 +290,13 @@
     c2.appendChild(el('h2', null, 'Needs your attention'));
     var tk = d.tickets || {};
     var gaps = d.gaps || [];
-    if (!tk.open && !gaps.length) {
+    var openAll = tk.open_all != null ? tk.open_all : tk.open;
+    if (!openAll && !gaps.length) {
       c2.appendChild(el('p', 'hint', 'Nothing is waiting for you.'));
       c2.appendChild(el('div', 'ok', 'Every ticket is closed and your policies covered every question this period.'));
     } else {
-      if (tk.open) {
-        c2.appendChild(el('p', 'hint', tk.open + ' open ticket' + (tk.open === 1 ? '' : 's') + ' waiting for a reply from your team.'));
+      if (openAll) {
+        c2.appendChild(el('p', 'hint', openAll + ' open ticket' + (openAll === 1 ? '' : 's') + ' waiting for a reply from your team.'));
         var ul = el('ul', 'list');
         (tk.open_list || []).forEach(function (x) {
           var li = el('li');
@@ -308,7 +309,7 @@
       }
       if (gaps.length) {
         var gh = el('p', 'hint', 'Your policies don\'t answer these yet. Add a line for each and the assistant will answer them next time:');
-        if (tk.open) gh.style.marginTop = '18px';
+        if (openAll) gh.style.marginTop = '18px';
         c2.appendChild(gh);
         var ul2 = el('ul', 'list');
         gaps.forEach(function (q) { ul2.appendChild(el('li', null, cap(q))); });
@@ -360,6 +361,7 @@
       tg2.appendChild(tile('Opened', fmt(tk.opened)));
       tg2.appendChild(tile('Closed', fmt(tk.resolved)));
       tg2.appendChild(tile('Still open', fmt(tk.open)));
+      c4.appendChild(el('p', 'hint', 'Of the tickets opened in this period.')).style.margin = '0 0 10px';
       c4.appendChild(tg2);
       c4.appendChild(el('p', 'hint', 'Your assistant is live: answers go straight to customers, and anything it can\'t answer from your policies goes to your team.')).style.marginTop = '14px';
     }
